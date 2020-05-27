@@ -1,4 +1,3 @@
-
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <cstdlib>
@@ -8,15 +7,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-
-
-//Уножение матриц на GPU
+//РЈРЅРѕР¶РµРЅРёРµ РјР°С‚СЂРёС† РЅР° GPU
 __global__ void Multiply_Matrix_GPU(float* A, float* B, float* C , int BLOCK_SIZE , int N) {
-	// Индекс блока
+	// РРЅРґРµРєСЃ Р±Р»РѕРєР°
 	int bx = blockIdx.x;
 	int by = blockIdx.y;
 
-	// Индекс нити
+	// РРЅРґРµРєСЃ РЅРёС‚Рё
 	int tx = threadIdx.x;
 	int ty = threadIdx.y;
 
@@ -30,13 +27,13 @@ __global__ void Multiply_Matrix_GPU(float* A, float* B, float* C , int BLOCK_SIZ
 	}
 	int ic = N * BLOCK_SIZE * by + BLOCK_SIZE * bx;
 
-	//Результирующая матрица
+	//Р РµР·СѓР»СЊС‚РёСЂСѓСЋС‰Р°СЏ РјР°С‚СЂРёС†Р°
 	C[ic + N * ty + tx] = total;
 }
 
 
 
-//Умножение матриц на CPU
+//РЈРјРЅРѕР¶РµРЅРёРµ РјР°С‚СЂРёС† РЅР° CPU
 
 void Multiply_Matrix_CPU(float* A, float* B, float* C, int N) {
 	for (int i = 0; i < N; i++) {
@@ -52,60 +49,60 @@ int main() {
 	const int  BLOCK_SIZE = 16;
 	const int N = 2048;
 
-	//Выделяем память для храния данных на CPU
+	//Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РґР»СЏ С…СЂР°РЅРёСЏ РґР°РЅРЅС‹С… РЅР° CPU
 	float *A = (float*) malloc(N * N *sizeof(float));
 	float *B = (float*) malloc(N * N* sizeof(float));
 	float *C_GPU = (float*) malloc(N * N *sizeof(float));
 	float *C_CPU = (float*) malloc(N * N*  sizeof(float));
 	
-	// Заполняем матрицы 
+	// Р—Р°РїРѕР»РЅСЏРµРј РјР°С‚СЂРёС†С‹ 
 	for (int i = 0; i < N; i++)
 		for (int j = 0; j < N; j++) {
-			//от -20 до 20 заполнили матрицы
+			//РѕС‚ -20 РґРѕ 20 Р·Р°РїРѕР»РЅРёР»Рё РјР°С‚СЂРёС†С‹
 			A[i + j * N] = (int)rand() % 41 - 20;
 			B[i + j * N] = (int)rand() % 41 - 20;
 		}
 
 
-	//Конфигурация запуска ядра
-	dim3 dimGrid(N / BLOCK_SIZE, N / BLOCK_SIZE);//Размер сетки
-	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);//Размер блока
+	//РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ Р·Р°РїСѓСЃРєР° СЏРґСЂР°
+	dim3 dimGrid(N / BLOCK_SIZE, N / BLOCK_SIZE);//Р Р°Р·РјРµСЂ СЃРµС‚РєРё
+	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);//Р Р°Р·РјРµСЂ Р±Р»РѕРєР°
 
 	
-	//event'ы для замера времени работы GPU
+	//event'С‹ РґР»СЏ Р·Р°РјРµСЂР° РІСЂРµРјРµРЅРё СЂР°Р±РѕС‚С‹ GPU
 	cudaEvent_t start;
 	cudaEvent_t stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 
 	
-	//Выделяем  память для храния данных на GPU
+	//Р’С‹РґРµР»СЏРµРј  РїР°РјСЏС‚СЊ РґР»СЏ С…СЂР°РЅРёСЏ РґР°РЅРЅС‹С… РЅР° GPU
 	float* adev, *bdev, *cdev;
 	cudaMalloc((void**)&adev, N * N * sizeof(float *));
 	cudaMalloc((void**)&bdev, N * N * sizeof(float *));
 	cudaMalloc((void**)&cdev, N * N * sizeof(float *));
 
-	//Копируем исходные матрицы с CPU на GPU
+	//РљРѕРїРёСЂСѓРµРј РёСЃС…РѕРґРЅС‹Рµ РјР°С‚СЂРёС†С‹ СЃ CPU РЅР° GPU
 	cudaMemcpy(adev, A, N * N * sizeof(float *), cudaMemcpyHostToDevice);
 	cudaMemcpy(bdev, B, N * N * sizeof(float *), cudaMemcpyHostToDevice);
 
 	cudaEventRecord(start, 0);   					
-	//Умножение матриц на GPU
+	//РЈРјРЅРѕР¶РµРЅРёРµ РјР°С‚СЂРёС† РЅР° GPU
 	Multiply_Matrix_GPU << < dimGrid, dimBlock >> > (adev, bdev , cdev,BLOCK_SIZE,N);
 	cudaEventRecord(stop, 0);    
 
-	//Синхронизируемя с моментом окончания расчетов
+	//РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРјСЏ СЃ РјРѕРјРµРЅС‚РѕРј РѕРєРѕРЅС‡Р°РЅРёСЏ СЂР°СЃС‡РµС‚РѕРІ
 	cudaEventSynchronize(stop);   
 
-	//Рассчитываем время работы GPU
+	//Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ GPU
 	float timeGPU = 0;
 	cudaEventElapsedTime(&timeGPU, start, stop);    
 	std::cout << "GPU time: " << timeGPU << std::endl;
 
-	//Копируем результат с GPU на CPU
+	//РљРѕРїРёСЂСѓРµРј СЂРµР·СѓР»СЊС‚Р°С‚ СЃ GPU РЅР° CPU
 	cudaMemcpy(C_GPU, cdev, N * N * sizeof(float *), cudaMemcpyDeviceToHost);
 
-	//Чистим память на GPU 
+	//Р§РёСЃС‚РёРј РїР°РјСЏС‚СЊ РЅР° GPU 
 	cudaEventDestroy(start);
 	cudaEventDestroy(stop);
 
@@ -115,7 +112,7 @@ int main() {
 
 	double start_time = clock();
 
-	//Умножение матриц на GPU
+	//РЈРјРЅРѕР¶РµРЅРёРµ РјР°С‚СЂРёС† РЅР° GPU
 
 	Multiply_Matrix_CPU(A, B, C_CPU,N);
 
@@ -123,7 +120,7 @@ int main() {
 
 	std::cout << "CPU time  " << ((end_time - start_time)) *1000 / CLOCKS_PER_SEC << std::endl;
 	
-	//Чистим память на CPU
+	//Р§РёСЃС‚РёРј РїР°РјСЏС‚СЊ РЅР° CPU
 	delete A;
 	delete B;
 	delete C_GPU;
