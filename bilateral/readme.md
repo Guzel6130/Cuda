@@ -19,4 +19,5 @@ Bilateral Filter
 ![Описание изображения](womanGPU.bmp)
 
 Time on CPU: 35 milliseconds
+
 Time on GPU: 6.60752 milliseconds
