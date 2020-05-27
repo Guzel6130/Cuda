@@ -20,7 +20,6 @@ __global__ void Multiply_Matrix_GPU(float* A, float* B, float* C , int BLOCK_SIZ
 	int ia = N * BLOCK_SIZE * by + N * ty;
 	int ib = BLOCK_SIZE * bx + tx;
 
-
 	for (int k = 0; k < N; k++) {
 		total += A[ia + k] * B[ib + k * N];
 	}
