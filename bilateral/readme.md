@@ -12,11 +12,11 @@ Bilateral Filter
 ## Input Image
 ![Описание изображения](woman.bmp)
 
-## OutputCPU Image
-![Описание изображения](womanCPU.bmp)
-
 ## OutputGPU Image
 ![Описание изображения](womanGPU.bmp)
+
+## OutputCPU Image
+![Описание изображения](womanCPU.bmp)
 
 Time on CPU: 35 milliseconds
 
