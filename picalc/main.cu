@@ -12,7 +12,6 @@
 #include <math.h>
 
 __global__ void Pi_GPU(float *x, float *y, int *totalCounts, int N) {
-	
 	int idx = blockIdx.x * blockDim.x + threadIdx.x; // номер элемента
 	int threadCount = gridDim.x * blockDim.x; //cмещение
 
@@ -25,7 +24,6 @@ __global__ void Pi_GPU(float *x, float *y, int *totalCounts, int N) {
 	atomicAdd(totalCounts, countPoints); // каждый поток суммирует в переменную
 }
 
-
 float PI_CPU(float *x, float *y, int N) {
 	int countPoints = 0; //Кол-во точек в круге
 	for (int i = 0; i < N; i++) {
@@ -36,10 +34,8 @@ float PI_CPU(float *x, float *y, int N) {
 	return float(countPoints) * 4 / N;
 }
 
-
-
-int main()
-{   // Количество точек 
+int main(){ 
+	// Количество точек 
 	const long long N = 20000000;
 	// Выделяем память для храния данных на CPU
 	float *X, *Y, *devX, *devY;
@@ -115,6 +111,5 @@ int main()
 	//Чистим память на CPU
 	delete X;
 	delete Y;
-	system("pause");
 	return 0;
 }
