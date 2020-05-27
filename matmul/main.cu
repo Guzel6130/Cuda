@@ -31,10 +31,7 @@ __global__ void Multiply_Matrix_GPU(float* A, float* B, float* C , int BLOCK_SIZ
 	C[ic + N * ty + tx] = total;
 }
 
-
-
 //Умножение матриц на CPU
-
 void Multiply_Matrix_CPU(float* A, float* B, float* C, int N) {
 	for (int i = 0; i < N; i++) {
 		for (int k = 0; k < N; k++) {
@@ -68,14 +65,12 @@ int main() {
 	dim3 dimGrid(N / BLOCK_SIZE, N / BLOCK_SIZE);//Размер сетки
 	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);//Размер блока
 
-	
 	//event'ы для замера времени работы GPU
 	cudaEvent_t start;
 	cudaEvent_t stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 
-	
 	//Выделяем  память для храния данных на GPU
 	float* adev, *bdev, *cdev;
 	cudaMalloc((void**)&adev, N * N * sizeof(float *));
@@ -111,11 +106,8 @@ int main() {
 	cudaFree(cdev);
 
 	double start_time = clock();
-
 	//Умножение матриц на GPU
-
 	Multiply_Matrix_CPU(A, B, C_CPU,N);
-
 	double end_time = clock();
 
 	std::cout << "CPU time  " << ((end_time - start_time)) *1000 / CLOCKS_PER_SEC << std::endl;
@@ -125,6 +117,5 @@ int main() {
 	delete B;
 	delete C_GPU;
 	delete C_CPU;
-	system("pause");
 	return 0;
 }
