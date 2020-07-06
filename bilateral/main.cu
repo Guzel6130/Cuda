@@ -18,7 +18,7 @@ float cpuGaussian[64];
 
 __constant__ float cGaussian[64];
 
-// объявляем ссылку на текстуру для двумерной текстуры float
+
 texture<float, cudaTextureType2D, cudaReadModeElementType> textur;
 
 __global__ void GPU_Bilateral(float * input, float *output, int width, int height,int radius, double euclidean_delta)
@@ -51,7 +51,7 @@ __global__ void GPU_Bilateral(float * input, float *output, int width, int heigh
 void writeImage(char *filePath, float *grayscale, unsigned int rows, unsigned int cols) {
 	BMP Output;
 	Output.SetSize(cols, rows);
-	// записали картинку 
+	 
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			RGBApixel pixel;
@@ -71,7 +71,7 @@ float *readImageGPU(char *filePathInput, unsigned int *rows, unsigned int *cols)
 	*rows = Image.TellHeight();
 	*cols = Image.TellWidth();
 	float *imageAsArray = (float *)calloc(*rows * *cols, sizeof(float));
-	// Преобразуем картику в черно-белую
+	
 	for (int i = 0; i < Image.TellWidth(); i++) {
 		for (int j = 0; j < Image.TellHeight(); j++) {
 			double Temp = 0.30*(Image(i, j)->Red) + 0.59*(Image(i, j)->Green) + 0.11*(Image(i, j)->Blue);
@@ -134,7 +134,7 @@ int main() {
 	unsigned int cols = 0;
 	int filter_radius = 1;
 	float euclidean_delta = 10000;
-	// считали картинку 
+	
 	float * imageAsArrayCPU = readImageGPU("woman.bmp", &rows, &cols);
 	float *outImageCPU = (float *)calloc(rows*cols, sizeof(float));
 
@@ -154,12 +154,12 @@ int main() {
 	cudaEventCreate(&stop);
 	cudaEventRecord(start, 0);
 
-	//Создали дескриптор канала с форматом Float
+	
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0,cudaChannelFormatKindFloat);
 	cudaArray *cuArray;
 	cudaMallocArray(&cuArray, &channelDesc, cols, rows);
 
-	// Скопировали массив imageAsArray в cuArray
+	
 	cudaMemcpyToArray(cuArray, 0, 0, imageAsArray, rows * cols * sizeof(float),cudaMemcpyHostToDevice);
 
 
@@ -171,12 +171,12 @@ int main() {
 	}
 	cudaMemcpyToSymbol(cGaussian, fGaussian, sizeof(float)*(2 * filter_radius + 1));
 
-	// Установили параметры текстуры
+	
 	textur.addressMode[0] = cudaAddressModeClamp;
 	textur.addressMode[1] = cudaAddressModeClamp;
 	textur.filterMode = cudaFilterModePoint;
 
-	// Привязали массив к текстуре
+	
 	cudaBindTextureToArray(textur, cuArray, channelDesc);
 
 	float *dev_grayscale, *dev_output, *output;
@@ -199,7 +199,7 @@ int main() {
 	cout << "Time on GPU: " << msec << " milliseconds" << endl;
 	writeImage("womanGPU.bmp", output, rows, cols);
 
-	//Чистим ресурсы на GPU
+	
 	cudaFreeArray(cuArray);
 	cudaFree(dev_output);
 
